@@ -1,6 +1,8 @@
-﻿import wx
+﻿import os
+import wx
 import pytube
 import ffmpeg
+import re, string
 import pydub
 from pydub import AudioSegment
 from Data import Description_Download
@@ -36,15 +38,16 @@ class Window(wx.Frame):
 
 	def Downloader(self):
 		v = pytube.YouTube(self.Link.GetValue())
-		v.streams.first().download('Descargas')
+		self.CleanName = re.sub('[%s]' % re.escape(string.punctuation), ' ', v.title)
+		v.streams.first().download('Descargas/'+self.CleanName)
 		self.Conversion()
 
 	def Conversion(self):
 		v = pytube.YouTube(self.Link.GetValue())
 		C_N = Convert(self)
 		if C_N.ShowModal() == wx.ID_OK:
-			AudioSegment.from_file('\"Descargas/'+v.title+'.mp4').export('Descargas/Audio.mp3', format='mp3\"')
-		# self.Link.SetValue('')
+			FileName = os.listdir('Descargas/'+self.CleanName)
+			AudioSegment.from_file('Descargas/'+self.CleanName+'/'+FileName[0]).export('Descargas/'+self.CleanName+'/'+self.CleanName+'.mp3', format='mp3')
 
 	def CloseProgram(self,evt):
 		self.Close()
